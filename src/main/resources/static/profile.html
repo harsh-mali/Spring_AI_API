@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - AI Chef</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #09090B;
+            --card-background: #18181B;
+            --card-border: #27272A;
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            --accent-primary: #6D28D9;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glass-header {
+            background-color: rgba(18, 18, 21, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+        }
+        .dropdown { position: relative; }
+        .dropdown-menu {
+            position: absolute; right: 0; top: calc(100% + 0.5rem);
+            background-color: var(--card-background); border: 1px solid var(--card-border);
+            border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            width: 200px; z-index: 50; opacity: 0; transform: translateY(-10px);
+            pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .dropdown-menu.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .dropdown-item {
+            display: block; width: 100%; padding: 0.75rem 1rem; color: var(--text-secondary);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .dropdown-item:hover { background-color: var(--accent-primary); color: var(--text-primary); }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<script>
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+    function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; } }
+    const decodedToken = parseJwt(token);
+    const userRoles = decodedToken ? decodedToken.roles || [] : [];
+</script>
+
+<header class="glass-header sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="M12 2a5 5 0 0 0-5 5c0 1.39.74 2.6 1.88 3.34L6 22h12l-2.88-11.66A5 5 0 0 0 12 2Z"/><path d="M18.74 14.7a14.28 14.28 0 0 1-13.48 0"/></svg>
+            <span class="text-lg font-bold text-white">AI Chef</span>
+        </a>
+        <div class="dropdown">
+            <button id="profile-button" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
+            <div id="dropdown-menu" class="dropdown-menu">
+                <div id="admin-link-container"></div>
+                <a href="/profile.html" class="dropdown-item">Profile</a>
+                <a href="/recipes.html" class="dropdown-item">My Recipes</a>
+                <a href="/licenses.html" class="dropdown-item">Licenses</a>
+                <div class="border-t border-gray-700 my-1"></div>
+                <button id="logout-button" class="dropdown-item text-left">Logout</button>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white">My Profile</h1>
+            <p class="mt-4 max-w-2xl text-lg text-gray-400">View your account details.</p>
+        </div>
+
+        <!-- Profile Card -->
+        <div id="profile-card" class="bg-gray-800/50 border border-gray-700 rounded-lg p-8 space-y-6">
+            <!-- Loading State -->
+            <div id="profile-loading-state">
+                <p class="text-gray-400">Loading your profile...</p>
+            </div>
+            <!-- Profile Details will be injected here -->
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Dropdown Menu Logic ---
+    const adminLinkContainer = document.getElementById('admin-link-container');
+    if (userRoles.includes('ROLE_ADMIN')) {
+        const adminLink = document.createElement('a');
+        adminLink.href = '/admin.html';
+        adminLink.className = 'dropdown-item';
+        adminLink.textContent = 'Admin Dashboard';
+        adminLinkContainer.appendChild(adminLink);
+    }
+    const profileButton = document.getElementById('profile-button');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    profileButton.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('open'); });
+    window.addEventListener('click', () => dropdownMenu.classList.remove('open'));
+    document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/login.html';
+    });
+
+    // --- Fetch and Display Profile ---
+    const profileCard = document.getElementById('profile-card');
+    const profileLoadingState = document.getElementById('profile-loading-state');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        if (!token) return;
+
+        try {
+            const response = await fetch('/api/v1/users/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch profile.');
+
+            const user = await response.json();
+            profileLoadingState.classList.add('hidden');
+            displayProfile(user);
+
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            profileCard.innerHTML = '<p class="text-red-400">Could not load your profile.</p>';
+        }
+    });
+
+    function displayProfile(user) {
+        profileCard.innerHTML = `
+            <div>
+                <label class="text-sm font-medium text-gray-400">Username</label>
+                <p class="mt-1 text-lg text-white">${user.username}</p>
+            </div>
+            <div class="border-t border-gray-700"></div>
+            <div>
+                <label class="text-sm font-medium text-gray-400">Email Address</label>
+                <p class="mt-1 text-lg text-white">${user.email}</p>
+            </div>
+            <div class="border-t border-gray-700"></div>
+            <div>
+                <label class="text-sm font-medium text-gray-400">Role</label>
+                <p class="mt-1">
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-purple-500 text-white' : 'bg-gray-600 text-gray-200'}">
+                        ${user.role}
+                    </span>
+                </p>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
