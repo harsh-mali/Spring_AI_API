@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recipe Generator</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles & Configuration -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a; /* A very dark gray, almost black */
+            color: #f0f0f0; /* Off-white for better readability */
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glow-effect {
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
+        }
+        /* Custom styles for recipe generator output */
+        #recipe-output h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #ec4899;
+        }
+        #recipe-output h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #a5b4fc;
+        }
+        #recipe-output ul, #recipe-output ol {
+            list-style-position: inside;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+         #recipe-output ul {
+            list-style-type: disc;
+        }
+        #recipe-output ol {
+            list-style-type: decimal;
+        }
+        #recipe-output li {
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+<!-- Main Content -->
+<main>
+    <!-- Recipe Generator Section -->
+    <section id="recipe-generator">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold gradient-text">AI Recipe Generator</h1>
+                <p class="text-gray-400 mt-2">Enter your ingredients and let our AI chef create a recipe for you!</p>
+            </div>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <!-- Input Form -->
+                <div class="bg-gray-900 p-8 rounded-xl border border-gray-700">
+                    <h3 class="text-xl font-bold mb-4 text-white">Your Kitchen</h3>
+                    <form id="recipe-form">
+                        <div class="mb-4">
+                            <label for="ingredients" class="block text-gray-400 mb-2 font-semibold">Available Ingredients</label>
+                            <textarea id="ingredients" name="ingredients" rows="4" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., chickpeas, garlic, lemon, tahini, olive oil"></textarea>
+                        </div>
+                        <div class="mb-6">
+                            <label for="restrictions" class="block text-gray-400 mb-2 font-semibold">Dietary Restrictions</label>
+                            <input type="text" id="restrictions" name="restrictions" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., vegan, gluten-free">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 glow-effect transform hover:scale-105">
+                            Generate Recipe
+                        </button>
+                    </form>
+                </div>
+                <!-- Output Display -->
+                <div id="recipe-output-container" class="bg-gray-900 p-8 rounded-xl border border-gray-700 min-h-[380px]">
+                    <h3 class="text-xl font-bold mb-4 text-white">Your Recipe</h3>
+                    <div id="recipe-output" class="text-gray-300">
+                        <p class="text-gray-500">Your generated recipe will appear here...</p>
+                    </div>
+                    <div id="loading-indicator" class="hidden text-center py-8">
+                        <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p class="mt-2 text-gray-400">Generating your masterpiece...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- JavaScript for Functionality -->
+<script>
+    // --- Recipe Generator ---
+    const recipeForm = document.getElementById('recipe-form');
+    const recipeOutput = document.getElementById('recipe-output');
+    const loadingIndicator = document.getElementById('loading-indicator');
+
+    recipeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const ingredients = e.target.elements.ingredients.value;
+        const restrictions = e.target.elements.restrictions.value;
+
+        if (!ingredients) {
+            recipeOutput.innerHTML = `<p class="text-yellow-400">Please enter some ingredients to get started.</p>`;
+            return;
+        }
+
+        // Show loading indicator and clear previous output
+        recipeOutput.innerHTML = '';
+        loadingIndicator.classList.remove('hidden');
+
+        // This is the prompt template you provided
+        const fullPrompt = `
+You are a professional chef and nutritionist. I will provide a list of available ingredients and any dietary restrictions. Based on that, generate one unique, delicious, and practical recipe that strictly follows these constraints.Return the output in the following structured format:Title: [Recipe name]Ingredients:- List all ingredients used with exact quantities (in grams, ml, tbsp, etc.)Instructions:1. Step-by-step cooking process.Cooking Time: [Total time in minutes]Serving Size: [How many people it serves]Dietary Notes:- Clearly state how the recipe satisfies the given restrictions (e.g., Vegan, Gluten-Free, Low-Carb).---**Here are the inputs:**Ingredients: ${ingredients}Dietary Restrictions: ${restrictions || 'None'}
+        `;
+
+        try {
+            // **FIXED THE URL AND DATA FORMAT HERE**
+            const response = await fetch('http://localhost:8080/api/gemini/ask', { // CORRECTED URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain', // CORRECTED Content-Type
+                },
+                body: fullPrompt, // CORRECTED: Sending the prompt as a plain string
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+            }
+
+            const resultText = await response.text();
+
+            // Format the plain text response from the AI into clean HTML
+            let formattedResponse = resultText
+                .replace(/Title: (.*)/g, '<h2>$1</h2>')
+                .replace(/Ingredients:/g, '<h3>Ingredients:</h3>')
+                .replace(/Instructions:/g, '<h3>Instructions:</h3>')
+                .replace(/Cooking Time:/g, '<h3>Cooking Time:</h3>')
+                .replace(/Serving Size:/g, '<h3>Serving Size:</h3>')
+                .replace(/Dietary Notes:/g, '<h3>Dietary Notes:</h3>');
+
+            // Process lists
+            const lines = formattedResponse.split('\n');
+            let html = '';
+            let inList = null; // can be 'ul' or 'ol'
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith('<h2>') || line.startsWith('<h3>')) {
+                    if (inList) html += `</${inList}>`;
+                    inList = null;
+                    html += line;
+                    if (line.includes('Ingredients')) {
+                        inList = 'ul';
+                        html += `<ul>`;
+                    } else if (line.includes('Instructions')) {
+                        inList = 'ol';
+                        html += `<ol>`;
+                    }
+                } else if (line.startsWith('- ')) {
+                    html += `<li>${line.substring(2)}</li>`;
+                } else if (line.match(/^\d+\.\s/)) {
+                    html += `<li>${line.replace(/^\d+\.\s/, '')}</li>`;
+                } else if (line) {
+                     if (inList) {
+                        html += `</${inList}>`;
+                        inList = null;
+                    }
+                    html += `<p>${line}</p>`;
+                }
+            });
+
+            if (inList) html += `</${inList}>`;
+
+            recipeOutput.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error calling the AI API:', error);
+            recipeOutput.innerHTML = `<p class="text-red-400"><strong>Sorry, something went wrong.</strong><br>Please ensure your Spring AI API is running on localhost:8080 and try again. Check the browser's developer console (F12) for more details.</p>`;
+        } finally {
+             // Hide loading indicator
+            loadingIndicator.classList.add('hidden');
+        }
+    });
+</script>
+</body>
+</html>

@@ -2,18 +2,16 @@ package com.AI.AiProject.controller;
 
 import com.AI.AiProject.service.GeminiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/gemini")
 @RequiredArgsConstructor
+@CrossOrigin
 public class GeminiController {
     private final GeminiService geminiService;
 
-    @GetMapping("/ask")
+    @PostMapping("/ask")
     public String askGeminiAPI(@RequestBody String prompt){
 
         return geminiService.askGemini(prompt);
