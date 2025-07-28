@@ -17,18 +17,26 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "_user") // We use "_user" because "user" is often a reserved keyword in SQL
+@Table(name = "_user")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String username;
+
+    @Column(unique = true)
     private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    // --- ADD THIS NEW FIELD ---
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recipe> recipes;
+    // -------------------------
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -42,7 +50,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // We will use email as the unique identifier for login
+        return email;
     }
 
     @Override

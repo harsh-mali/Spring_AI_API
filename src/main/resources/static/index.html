@@ -8,273 +8,470 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --background: #09090B;
+            --card-background: #18181B;
+            --card-border: #27272A;
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            --accent-primary: #6D28D9;
+            --accent-secondary: #EC4899;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #f0f0f0;
+            background-color: var(--background);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .gradient-text {
-            background: linear-gradient(to right, #4f46e5, #ec4899);
+        .glass-header {
+            background-color: rgba(18, 18, 21, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+        }
+        .custom-input {
+            background-color: var(--card-background);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.3);
+        }
+        .shiny-button {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            transition: transform 0.2s ease-out;
+        }
+        .shiny-button:hover {
+            transform: scale(1.02);
+        }
+        .content-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        #recipe-output h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+            background: linear-gradient(to right, var(--accent-secondary), #fde047);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .glow-effect {
-            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
-        }
-        #recipe-output h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            color: #ec4899;
-        }
-        #recipe-output h3 {
+        #recipe-output h3, #macros-and-notes h3 {
             font-size: 1.25rem;
-            font-weight: bold;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #a5b4fc;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.5rem;
         }
         #recipe-output ul, #recipe-output ol {
-            list-style-position: inside;
-            padding-left: 1rem;
-            margin-bottom: 1rem;
+            list-style-position: outside;
+            padding-left: 1.5rem;
+            color: var(--text-secondary);
         }
-         #recipe-output ul {
-            list-style-type: disc;
-        }
-        #recipe-output ol {
-            list-style-type: decimal;
+        #recipe-output li::marker {
+            color: var(--accent-primary);
         }
         #recipe-output li {
-            margin-bottom: 0.25rem;
+            padding-left: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        #macros-table {
+            width: 100%;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+        #macros-table td {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+        #macros-table tr:last-child td {
+            border-bottom: none;
+        }
+        @keyframes subtle-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+        .feature-button {
+            background-color: #27272A;
+            border: 1px solid #3f3f46;
+            transition: all 0.2s;
+            animation: subtle-bounce 2.5s ease-in-out infinite;
+        }
+        .feature-button:hover {
+            background-color: #3f3f46;
+            border-color: var(--accent-primary);
+            animation-play-state: paused;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background-color: var(--card-background);
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .dropdown-menu.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: var(--accent-primary);
+            color: var(--text-primary);
         }
     </style>
 </head>
-<body class="bg-gray-900">
+<body class="min-h-screen">
 
-<!-- Auth Check Script -->
 <script>
-    // This script runs before the page loads to protect the route
     const token = localStorage.getItem('jwt_token');
     if (!token) {
         window.location.href = '/login.html';
     }
+    function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; } }
+    const decodedToken = parseJwt(token);
+    const userRoles = decodedToken ? decodedToken.roles || [] : [];
 </script>
 
-<!-- Header -->
-<header class="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700 sticky top-0 z-50">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold gradient-text">AI Recipe Generator</h1>
-        <div>
-            <!-- We can add a profile button here later -->
-            <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-                Logout
+<header class="glass-header sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="M12 2a5 5 0 0 0-5 5c0 1.39.74 2.6 1.88 3.34L6 22h12l-2.88-11.66A5 5 0 0 0 12 2Z"/><path d="M18.74 14.7a14.28 14.28 0 0 1-13.48 0"/></svg>
+            <span class="text-lg font-bold text-white">AI Chef</span>
+        </a>
+
+        <div class="dropdown">
+            <button id="profile-button" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </button>
+            <div id="dropdown-menu" class="dropdown-menu">
+                <div id="admin-link-container"></div> <!-- Admin link will be injected here -->
+                <a href="#" class="dropdown-item">Profile</a>
+                <a href="/recipes.html" class="dropdown-item">My Recipes</a>
+                <a href="#" class="dropdown-item">Licenses</a>
+                <div class="border-t border-gray-700 my-1"></div>
+                <button id="logout-button" class="dropdown-item text-left">Logout</button>
+            </div>
         </div>
-    </div>
+    </nav>
 </header>
 
-<!-- Main Content -->
-<main class="flex items-center justify-center min-h-screen pt-16 pb-16">
-    <!-- Recipe Generator Section -->
-    <section id="recipe-generator">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-5xl font-bold text-white">Let's Get Cooking</h1>
-                <p class="text-gray-400 mt-2">Enter your ingredients and let our AI chef create a recipe for you!</p>
+<main class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- ... rest of your main content ... -->
+    <div class="max-w-7xl mx-auto">
+        <section class="text-center py-12">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white">Your Personal AI Chef</h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-400">Tell us what you have. We'll create something magical.</p>
+            <form id="recipe-form" class="mt-8 max-w-2xl mx-auto space-y-4">
+                <div>
+                    <label for="ingredients" class="sr-only">Ingredients</label>
+                    <textarea id="ingredients" name="ingredients" rows="4" class="w-full p-4 custom-input rounded-lg" placeholder="e.g., chicken breast, cherry tomatoes, basil, garlic..."></textarea>
+                </div>
+                <div>
+                    <label for="restrictions" class="sr-only">Dietary Restrictions</label>
+                    <input type="text" id="restrictions" name="restrictions" class="w-full p-4 custom-input rounded-lg" placeholder="e.g., gluten-free, low-carb...">
+                </div>
+                <div>
+                    <button type="submit" class="w-full py-4 text-lg font-bold text-white rounded-lg shiny-button">
+                        Create My Recipe
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="mt-8">
+            <div id="loading-indicator" class="hidden flex flex-col items-center justify-center text-center py-12">
+                <svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="mt-4 text-lg text-gray-400">Preheating the AI ovens...</p>
             </div>
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                <!-- Input Form -->
-                <div class="bg-gray-900 p-8 rounded-xl border border-gray-700">
-                    <h3 class="text-xl font-bold mb-4 text-white">Your Kitchen</h3>
-                    <form id="recipe-form">
-                        <div class="mb-4">
-                            <label for="ingredients" class="block text-gray-400 mb-2 font-semibold">Available Ingredients</label>
-                            <textarea id="ingredients" name="ingredients" rows="4" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., chicken, rice, tomatoes"></textarea>
+
+            <div id="result-area" class="hidden opacity-0 transition-opacity duration-500 lg:grid lg:grid-cols-3 lg:gap-8 items-start">
+                <div class="lg:col-span-2 content-card p-6 sm:p-8 lg:p-10 space-y-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-lg text-purple-400 mb-3">Your Request</h3>
+                            <div id="user-prompt-display" class="p-4 bg-black/20 border border-gray-700 rounded-lg text-gray-300"></div>
                         </div>
-                        <div class="mb-6">
-                            <label for="restrictions" class="block text-gray-400 mb-2 font-semibold">Dietary Restrictions</label>
-                            <input type="text" id="restrictions" name="restrictions" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., vegetarian, low-carb">
-                        </div>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 glow-effect transform hover:scale-105">
-                            Generate Recipe
+                        <button id="save-recipe-button" class="flex items-center space-x-2 px-4 py-2 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed ml-4 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            <span>Save</span>
                         </button>
-                    </form>
-                </div>
-                <!-- Output Display -->
-                <div id="recipe-output-container" class="bg-gray-900 p-8 rounded-xl border border-gray-700 min-h-[380px]">
-                    <h3 class="text-xl font-bold mb-4 text-white">Your Recipe</h3>
-                    <div id="recipe-output" class="text-gray-300">
-                        <p class="text-gray-500">Your generated recipe will appear here...</p>
                     </div>
-                    <div id="loading-indicator" class="hidden text-center py-8">
-                        <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p class="mt-2 text-gray-400">Generating your masterpiece...</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 md:gap-8 pt-6 border-t border-gray-700">
+                        <div id="recipe-output" class="md:col-span-2"></div>
+                        <div id="macros-and-notes" class="mt-8 md:mt-0"></div>
+                    </div>
+                </div>
+
+                <div id="ai-features" class="lg:col-span-1 space-y-6 mt-8 lg:mt-0">
+                    <div class="content-card p-6 feature-button">
+                        <button id="shopping-list-button" class="w-full text-left">
+                            <strong class="text-white text-lg">✨ Generate Shopping List</strong>
+                            <p class="text-sm text-gray-400 mt-1">Create a clean list from the ingredients.</p>
+                        </button>
+                        <div id="shopping-list-output" class="mt-4 hidden pt-4 border-t border-gray-700 text-gray-300"></div>
+                    </div>
+                    <div class="content-card p-6 feature-button" style="animation-delay: 0.2s;">
+                        <button id="pairing-button" class="w-full text-left">
+                            <strong class="text-white text-lg">🍷 Suggest Drink Pairing</strong>
+                            <p class="text-sm text-gray-400 mt-1">Get a wine or non-alcoholic suggestion.</p>
+                        </button>
+                        <div id="pairing-output" class="mt-4 hidden pt-4 border-t border-gray-700 text-gray-300"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </div>
 </main>
 
-<!-- JavaScript for Functionality -->
 <script>
-    // --- Logout Logic ---
+    // --- NEW: Add Admin Link if applicable ---
+    const adminLinkContainer = document.getElementById('admin-link-container');
+    if (userRoles.includes('ROLE_ADMIN')) {
+        const adminLink = document.createElement('a');
+        adminLink.href = '/admin.html';
+        adminLink.className = 'dropdown-item';
+        adminLink.textContent = 'Admin Dashboard';
+        adminLinkContainer.appendChild(adminLink);
+    }
+
+    // --- Dropdown Menu Logic ---
+    const profileButton = document.getElementById('profile-button');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    profileButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        dropdownMenu.classList.toggle('open');
+    });
+    window.addEventListener('click', () => {
+        if (dropdownMenu.classList.contains('open')) {
+            dropdownMenu.classList.remove('open');
+        }
+    });
     document.getElementById('logout-button').addEventListener('click', () => {
         localStorage.removeItem('jwt_token');
         window.location.href = '/login.html';
     });
 
-
-    // --- Recipe Generator ---
+    // --- The rest of your page's JavaScript ---
     const recipeForm = document.getElementById('recipe-form');
-    const recipeOutput = document.getElementById('recipe-output');
     const loadingIndicator = document.getElementById('loading-indicator');
+    const resultArea = document.getElementById('result-area');
+    const userPromptDisplay = document.getElementById('user-prompt-display');
+    const recipeOutput = document.getElementById('recipe-output');
+    const macrosAndNotes = document.getElementById('macros-and-notes');
+    const shoppingListButton = document.getElementById('shopping-list-button');
+    const pairingButton = document.getElementById('pairing-button');
+    const shoppingListOutput = document.getElementById('shopping-list-output');
+    const pairingOutput = document.getElementById('pairing-output');
+    const saveButton = document.getElementById('save-recipe-button');
+    let currentRecipeData = null;
 
     recipeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const ingredients = e.target.elements.ingredients.value;
         const restrictions = e.target.elements.restrictions.value;
+        if (!ingredients) { alert("Please enter some ingredients."); return; }
 
-        if (!ingredients) {
-            recipeOutput.innerHTML = `<p class="text-yellow-400">Please enter some ingredients to get started.</p>`;
-            return;
-        }
-
-        recipeOutput.innerHTML = '';
         loadingIndicator.classList.remove('hidden');
+        resultArea.classList.add('hidden');
+        resultArea.classList.remove('opacity-100');
+        shoppingListOutput.classList.add('hidden');
+        pairingOutput.classList.add('hidden');
+        shoppingListOutput.innerHTML = '';
+        pairingOutput.innerHTML = '';
+        userPromptDisplay.innerHTML = `<p><strong class="font-semibold text-gray-200">Ingredients:</strong> ${ingredients}</p><p><strong class="font-semibold text-gray-200">Restrictions:</strong> ${restrictions || 'None'}</p>`;
 
         const fullPrompt = `
-You are a professional chef and nutritionist. I will provide a list of available ingredients and any dietary restrictions. Based on that, generate one unique, delicious, and practical recipe that strictly follows these constraints.Return the output in the following structured format:Title: [Recipe name]Ingredients:- List all ingredients used with exact quantities (in grams, ml, tbsp, etc.)Instructions:1. Step-by-step cooking process.Cooking Time: [Total time in minutes]Serving Size: [How many people it serves]Dietary Notes:- Clearly state how the recipe satisfies the given restrictions (e.g., Vegan, Gluten-Free, Low-Carb).---**Here are the inputs:**Ingredients: ${ingredients}Dietary Restrictions: ${restrictions || 'None'}
+You are a professional chef and nutritionist. I will provide a list of available ingredients and any dietary restrictions. Based on that, generate one unique, delicious, and practical recipe that strictly follows these constraints.
+Return the output in the following structured format:
+Title: [Recipe name]
+Ingredients:
+- List all ingredients used with exact quantities (in grams, ml, tbsp, etc.)
+Instructions:
+1. Step-by-step cooking process.
+Cooking Time: [Total time in minutes]
+Serving Size: [How many people it serves]
+Dietary Notes:
+- Clearly state how the recipe satisfies the given restrictions (e.g., Vegan, Gluten-Free, Low-Carb).
+Macros:
+| Nutrient | Amount per Serving |
+|----------|--------------------|
+| Calories | value kcal         |
+| Protein  | value g            |
+| Fat      | value g            |
+| Carbs    | value g            |
+---
+**Here are the inputs:**
+Ingredients: ${ingredients}
+Dietary Restrictions: ${restrictions || 'None'}
         `;
 
         try {
-            // Get the token from localStorage
-            const token = localStorage.getItem('jwt_token');
-            if (!token) {
-                // This should not happen due to the auth check at the top, but it's good practice
-                window.location.href = '/login.html';
-                return;
-            }
-
-            const response = await fetch('http://localhost:8080/api/gemini/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain',
-                    'Authorization': `Bearer ${token}` // Add the Authorization header
-                },
-                body: fullPrompt,
-            });
-
-            if (response.status === 403) {
-                 // Handle forbidden error, likely an invalid token
-                localStorage.removeItem('jwt_token');
-                window.location.href = '/login.html';
-                return;
-            }
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-            }
-
-            const resultText = await response.text();
-
-            let formattedResponse = resultText
-                .replace(/Title: (.*)/g, '<h2>$1</h2>')
-                .replace(/Ingredients:/g, '<h3>Ingredients:</h3>')
-                .replace(/Instructions:/g, '<h3>Instructions:</h3>')
-                .replace(/Cooking Time:/g, '<h3>Cooking Time:</h3>')
-                .replace(/Serving Size:/g, '<h3>Serving Size:</h3>')
-                .replace(/Dietary Notes:/g, '<h3>Dietary Notes:</h3>');
-
-            const lines = formattedResponse.split('\n');
-            let html = '';
-            let inList = null;
-
-            lines.forEach(line => {
-                line = line.trim();
-                if (line.startsWith('<h2>') || line.startsWith('<h3>')) {
-                    if (inList) html += `</${inList}>`;
-                    inList = null;
-                    html += line;
-                    if (line.includes('Ingredients')) {
-                        inList = 'ul';
-                        html += `<ul>`;
-                    } else if (line.includes('Instructions')) {
-                        inList = 'ol';
-                        html += `<ol>`;
-                    }
-                } else if (line.startsWith('- ')) {
-                    html += `<li>${line.substring(2)}</li>`;
-                } else if (line.match(/^\d+\.\s/)) {
-                    html += `<li>${line.replace(/^\d+\.\s/, '')}</li>`;
-                } else if (line) {
-                     if (inList) {
-                        html += `</${inList}>`;
-                        inList = null;
-                    }
-                    html += `<p>${line}</p>`;
-                }
-            });
-
-            if (inList) html += `</${inList}>`;
-
-            recipeOutput.innerHTML = html;
-
+            const resultText = await callGeminiAPI(fullPrompt);
+            parseAndDisplayRecipe(resultText);
         } catch (error) {
             console.error('Error calling the AI API:', error);
-            recipeOutput.innerHTML = `<p class="text-red-400"><strong>Sorry, something went wrong.</strong><br>Please ensure your Spring AI API is running on localhost:8080 and try again.</p>`;
+            recipeOutput.innerHTML = `<p class="text-red-400"><strong>Sorry, something went wrong.</strong></p>`;
         } finally {
             loadingIndicator.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            setTimeout(() => resultArea.classList.add('opacity-100'), 10);
         }
     });
+
+    shoppingListButton.addEventListener('click', async () => {
+        if (!currentRecipeData || !currentRecipeData.ingredients) return;
+        shoppingListOutput.classList.remove('hidden');
+        shoppingListOutput.innerHTML = 'Generating list...';
+        const prompt = `Based on the following list of ingredients, create a simple, well-organized shopping list. Group items by category (e.g., Produce, Pantry, Dairy, Protein).\n\nIngredients:\n${currentRecipeData.ingredients}`;
+        try {
+            const resultText = await callGeminiAPI(prompt);
+            shoppingListOutput.innerHTML = resultText.replace(/\n/g, '<br>');
+        } catch (error) {
+            shoppingListOutput.innerHTML = 'Could not generate list.';
+        }
+    });
+
+    pairingButton.addEventListener('click', async () => {
+        if (!currentRecipeData || !currentRecipeData.title) return;
+        pairingOutput.classList.remove('hidden');
+        pairingOutput.innerHTML = 'Thinking of a good pairing...';
+        const prompt = `What is a good wine or non-alcoholic drink pairing for a dish called "${currentRecipeData.title}"? Provide one suggestion for each and a brief, one-sentence explanation for why it pairs well.`;
+        try {
+            const resultText = await callGeminiAPI(prompt);
+            pairingOutput.innerHTML = resultText.replace(/\n/g, '<br>');
+        } catch (error) {
+            pairingOutput.innerHTML = 'Could not generate pairing.';
+        }
+    });
+
+    saveButton.addEventListener('click', async () => {
+        if (!currentRecipeData) return;
+
+        const token = localStorage.getItem('jwt_token');
+        if (!token) { window.location.href = '/login.html'; return; }
+
+        try {
+            const response = await fetch('/api/v1/recipes/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(currentRecipeData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save recipe.');
+            }
+
+            saveButton.querySelector('span').textContent = 'Saved!';
+            saveButton.disabled = true;
+            setTimeout(() => {
+                saveButton.querySelector('span').textContent = 'Save';
+                saveButton.disabled = false;
+            }, 2000);
+
+        } catch (error) {
+            console.error("Failed to save recipe:", error);
+            alert(error.message);
+        }
+    });
+
+    async function callGeminiAPI(prompt) {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) { window.location.href = '/login.html'; throw new Error("No auth token found"); }
+        const response = await fetch('http://localhost:8080/api/gemini/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain', 'Authorization': `Bearer ${token}` },
+            body: prompt,
+        });
+        if (response.status === 403) { localStorage.removeItem('jwt_token'); window.location.href = '/login.html'; throw new Error("Forbidden"); }
+        if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
+        return await response.text();
+    }
+
+    function parseAndDisplayRecipe(text) {
+        recipeOutput.innerHTML = '';
+        macrosAndNotes.innerHTML = '';
+
+        const sections = {
+            title: text.match(/Title: (.*)/)?.[1].trim() || '',
+            ingredients: text.match(/Ingredients:([\s\S]*?)Instructions:/)?.[1].trim() || '',
+            instructions: text.match(/Instructions:([\s\S]*?)Cooking Time:/)?.[1].trim() || '',
+            cookingTime: text.match(/Cooking Time: (.*)/)?.[1].trim() || '',
+            servingSize: text.match(/Serving Size: (.*)/)?.[1].trim() || '',
+            dietaryNotes: text.match(/Dietary Notes:([\s\S]*?)Macros:/)?.[1].trim() || '',
+            macros: text.match(/Macros:([\s\S]*)/)?.[1].trim() || ''
+        };
+
+        currentRecipeData = sections;
+
+        recipeOutput.innerHTML = `
+            ${sections.title ? `<h2>${sections.title}</h2>` : ''}
+            ${sections.ingredients ? `<h3>Ingredients</h3><ul>${formatList(sections.ingredients)}</ul>` : ''}
+            ${sections.instructions ? `<h3>Instructions</h3><ol>${formatList(sections.instructions)}</ol>` : ''}
+        `;
+
+        macrosAndNotes.innerHTML = `
+            ${sections.macros ? `<h3>Nutrition Facts</h3>${formatMacrosTable(sections.macros)}` : ''}
+            ${sections.cookingTime ? `<h3>Cooking Time</h3><p class="text-gray-400">${sections.cookingTime}</p>` : ''}
+            ${sections.servingSize ? `<h3>Serving Size</h3><p class="text-gray-400">${sections.servingSize}</p>` : ''}
+            ${sections.dietaryNotes ? `<h3>Dietary Notes</h3><div class="text-sm text-gray-400">${sections.dietaryNotes.replace(/- /g, '• ')}</div>` : ''}
+        `;
+        saveButton.disabled = false;
+    }
+
+    function formatList(block) {
+        return block.split('\n').filter(line => line.trim().length > 0 && line.trim().match(/^(\-|\d+\.)/)).map(line => `<li>${line.replace(/^(\-|\d+\.)\s*/, '').trim()}</li>`).join('');
+    }
+
+    function formatMacrosTable(block) {
+        const rows = block.trim().split('\n').slice(2);
+        let tableHtml = '<table id="macros-table"><tbody>';
+        rows.forEach(row => {
+            const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell);
+            if (cells.length === 2) {
+                tableHtml += `<tr><td class="font-semibold text-gray-300">${cells[0]}</td><td class="text-right">${cells[1]}</td></tr>`;
+            }
+        });
+        return tableHtml + '</tbody></table>';
+    }
 </script>
 </body>
 </html>
-```
-
-Now, let's address your other two questions.
-
-### Step 2: Guide to Using a Permanent Database
-
-To switch from the temporary H2 database to a permanent one like PostgreSQL, follow this guide.
-
-
-### How to Switch from H2 to PostgreSQL
-
-Using a permanent database like PostgreSQL is essential for a real application. Here’s how to configure your Spring Boot project to use it.
-
-#### Prerequisites
-1.  **Install PostgreSQL:** You need to have PostgreSQL installed on your computer. You can download it from the [official website](https://www.postgresql.org/download/).
-2.  **Create a Database:** Using a tool like `psql` or a GUI like pgAdmin, create a new database for your project. For this example, let's say you named it `ai_recipes_db`.
-
-#### Step 2.1: Update Your `pom.xml`
-
-You need to add the PostgreSQL driver dependency and remove the H2 one.
-
-1.  **Add PostgreSQL Driver:**
-```xml
-<dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-    <scope>runtime</scope>
-</dependency>
-```
-
-2.  **Remove H2 Driver:** Delete this entire dependency block.
-```xml
-<!-- REMOVE THIS BLOCK -->
-<dependency>
-    <groupId>com.h2database</groupId>
-    <artifactId>h2</artifactId>
-    <scope>runtime</scope>
-</dependency>
-```

@@ -3,131 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Register</title>
+    <title>Login & Register - AI Chef</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --background: #09090B;
+            --card-background: #18181B;
+            --card-border: #27272A;
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            --accent-primary: #6D28D9;
+            --accent-secondary: #EC4899;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #f0f0f0;
+            background-color: var(--background);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
-        .form-container {
-            background-color: #1a1a1a;
-            border: 1px solid #2a2a2a;
+        .form-wrapper {
+            background-color: var(--card-background);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
         }
-        .tab-button.active {
-            background-color: #4f46e5;
-            color: white;
+        .custom-input {
+            background-color: #27272A;
+            border: 1px solid #3f3f46;
+            color: var(--text-primary);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.3);
+        }
+        .shiny-button {
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            transition: transform 0.2s ease-out;
+        }
+        .shiny-button:hover {
+            transform: scale(1.02);
         }
         .tab-button {
-            background-color: #3a3a3a;
-            color: #a0a0a0;
+            transition: color 0.3s;
+            position: relative;
         }
-        .gradient-text {
-            background: linear-gradient(to right, #4f46e5, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .tab-button.active {
+            color: var(--text-primary);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-primary);
+        }
+        .form-container {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.45, 0, 0.55, 1);
+        }
+        .form-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            padding: 1.5rem 2rem 2rem 2rem;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body>
 
-<div class="w-full max-w-md p-8 space-y-8 form-container rounded-xl">
-    <div>
-        <h2 class="text-3xl font-extrabold text-center text-white">
-            Welcome to <span class="gradient-text">AI Recipes</span>
-        </h2>
+<div class="form-wrapper">
+    <div class="pt-8 px-8">
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="M12 2a5 5 0 0 0-5 5c0 1.39.74 2.6 1.88 3.34L6 22h12l-2.88-11.66A5 5 0 0 0 12 2Z"/><path d="M18.74 14.7a14.28 14.28 0 0 1-13.48 0"/></svg>
+                <span class="text-2xl font-bold text-white">AI Chef</span>
+            </div>
+            <p class="mt-2 text-gray-400">Welcome back! Sign in to continue.</p>
+        </div>
+
+        <div class="flex border-b border-gray-700">
+            <button id="login-tab" class="flex-1 pb-2 text-center font-semibold text-gray-400 tab-button active">Sign In</button>
+            <button id="register-tab" class="flex-1 pb-2 text-center font-semibold text-gray-400 tab-button">Create Account</button>
+        </div>
     </div>
 
-    <!-- Tab buttons -->
-    <div class="flex p-1 bg-gray-800 rounded-lg">
-        <button id="login-tab" class="w-1/2 py-2 font-semibold transition-colors duration-300 rounded-md tab-button active">Login</button>
-        <button id="register-tab" class="w-1/2 py-2 font-semibold transition-colors duration-300 rounded-md tab-button">Register</button>
+    <div id="forms-container" class="form-container">
+        <div id="login-form" class="form-slide">
+            <form class="space-y-6">
+                <input id="login-email" name="email" type="email" autocomplete="email" required class="w-full p-3 custom-input rounded-md" placeholder="Email address">
+                <input id="login-password" name="password" type="password" autocomplete="current-password" required class="w-full p-3 custom-input rounded-md" placeholder="Password">
+                <button type="submit" class="w-full py-3 font-bold text-white rounded-md shiny-button">Sign In</button>
+            </form>
+        </div>
+
+        <div id="register-form" class="form-slide">
+            <form class="space-y-6">
+                <input id="register-username" name="username" type="text" required class="w-full p-3 custom-input rounded-md" placeholder="Username">
+                <input id="register-email" name="email" type="email" autocomplete="email" required class="w-full p-3 custom-input rounded-md" placeholder="Email address">
+                <input id="register-password" name="password" type="password" required class="w-full p-3 custom-input rounded-md" placeholder="Password">
+                <input type="hidden" id="role" name="role" value="CLIENT">
+                <button type="submit" class="w-full py-3 font-bold text-white rounded-md shiny-button">Create Account</button>
+            </form>
+        </div>
     </div>
-
-    <!-- Login Form -->
-    <form id="login-form" class="space-y-6">
-        <div class="space-y-4 rounded-md shadow-sm">
-            <div>
-                <label for="login-email" class="sr-only">Email address</label>
-                <input id="login-email" name="email" type="email" autocomplete="email" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Email address">
-            </div>
-            <div>
-                <label for="login-password" class="sr-only">Password</label>
-                <input id="login-password" name="password" type="password" autocomplete="current-password" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password">
-            </div>
-        </div>
-        <div>
-            <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900">
-                Sign in
-            </button>
-        </div>
-    </form>
-
-    <!-- Registration Form -->
-    <form id="register-form" class="hidden space-y-6">
-        <div class="space-y-4 rounded-md shadow-sm">
-            <div>
-                <label for="register-username" class="sr-only">Username</label>
-                <input id="register-username" name="username" type="text" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Username">
-            </div>
-            <div>
-                <label for="register-email" class="sr-only">Email address</label>
-                <input id="register-email" name="email" type="email" autocomplete="email" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Email address">
-            </div>
-            <div>
-                <label for="register-password" class="sr-only">Password</label>
-                <input id="register-password" name="password" type="password" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password">
-            </div>
-            <!-- Role Selection -->
-            <div>
-                <label for="role" class="block mb-2 text-sm font-medium text-gray-400">Register as:</label>
-                <select id="role" name="role" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="CLIENT">Client</option>
-                    <option value="ADMIN">Admin</option>
-                </select>
-            </div>
-        </div>
-        <div>
-            <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900">
-                Create Account
-            </button>
-        </div>
-    </form>
-    <div id="message-area" class="min-h-[24px] text-center text-red-400 font-medium"></div>
+    <div id="message-area" class="min-h-[24px] text-center text-red-400 font-medium px-8 pb-8"></div>
 </div>
 
 <script>
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
+    const formsContainer = document.getElementById('forms-container');
+    const loginForm = document.getElementById('login-form').querySelector('form');
+    const registerForm = document.getElementById('register-form').querySelector('form');
     const messageArea = document.getElementById('message-area');
+
+    // --- Helper function to parse JWT ---
+    function parseJwt(token) {
+        try {
+            return JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // --- Helper function for redirection ---
+    function handleRedirect(token) {
+        const decodedToken = parseJwt(token);
+        const roles = decodedToken ? decodedToken.roles || [] : [];
+        if (roles.includes('ROLE_ADMIN')) {
+            window.location.href = '/admin.html';
+        } else {
+            window.location.href = '/';
+        }
+    }
 
     loginTab.addEventListener('click', () => {
         loginTab.classList.add('active');
         registerTab.classList.remove('active');
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
+        formsContainer.style.transform = 'translateX(0%)';
         messageArea.textContent = '';
     });
 
     registerTab.addEventListener('click', () => {
         registerTab.classList.add('active');
         loginTab.classList.remove('active');
-        registerForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
+        formsContainer.style.transform = 'translateX(-100%)';
         messageArea.textContent = '';
     });
 
-    // --- Registration Logic ---
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         messageArea.textContent = '';
-
         const data = {
             username: registerForm.username.value,
             email: registerForm.email.value,
@@ -136,50 +176,38 @@
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+            const response = await fetch('/api/v1/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
-            if (!response.ok) {
-                throw new Error('Registration failed. Please try again.');
-            }
-
+            if (!response.ok) throw new Error('Registration failed.');
             const result = await response.json();
             localStorage.setItem('jwt_token', result.token);
-            window.location.href = '/'; // Redirect to the main app
-
+            handleRedirect(result.token); // Use the redirect handler
         } catch (error) {
             messageArea.textContent = error.message;
         }
     });
 
-    // --- Login Logic ---
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         messageArea.textContent = '';
-
         const data = {
             email: loginForm.email.value,
             password: loginForm.password.value
         };
 
         try {
-            const response = await fetch('http://localhost:8080/api/v1/auth/authenticate', {
+            const response = await fetch('/api/v1/auth/authenticate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
-            if (!response.ok) {
-                throw new Error('Login failed. Please check your email and password.');
-            }
-
+            if (!response.ok) throw new Error('Login failed. Check credentials.');
             const result = await response.json();
             localStorage.setItem('jwt_token', result.token);
-            window.location.href = '/'; // Redirect to the main app
-
+            handleRedirect(result.token); // Use the redirect handler
         } catch (error) {
             messageArea.textContent = error.message;
         }
@@ -187,4 +215,3 @@
 </script>
 </body>
 </html>
-```

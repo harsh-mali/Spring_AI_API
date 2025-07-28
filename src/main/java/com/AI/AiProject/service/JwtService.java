@@ -6,20 +6,21 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority; // Import this
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List; // Import this
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors; // Import this
 
 @Service
 public class JwtService {
 
-    // You need to add this secret key to your application.properties
-    // For example: jwt.secret=your-super-secret-key-that-is-long-enough
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
@@ -33,7 +34,16 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        // --- THIS IS THE KEY CHANGE ---
+        // Create a map for extra claims and add the user's roles to it.
+        Map<String, Object> extraClaims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        extraClaims.put("roles", roles);
+        // -----------------------------
+
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
