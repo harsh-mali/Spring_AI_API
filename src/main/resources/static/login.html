@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+        }
+        .form-container {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+        }
+        .tab-button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .tab-button {
+            background-color: #3a3a3a;
+            color: #a0a0a0;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+<div class="w-full max-w-md p-8 space-y-8 form-container rounded-xl">
+    <div>
+        <h2 class="text-3xl font-extrabold text-center text-white">
+            Welcome to <span class="gradient-text">AI Recipes</span>
+        </h2>
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="flex p-1 bg-gray-800 rounded-lg">
+        <button id="login-tab" class="w-1/2 py-2 font-semibold transition-colors duration-300 rounded-md tab-button active">Login</button>
+        <button id="register-tab" class="w-1/2 py-2 font-semibold transition-colors duration-300 rounded-md tab-button">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="space-y-6">
+        <div class="space-y-4 rounded-md shadow-sm">
+            <div>
+                <label for="login-email" class="sr-only">Email address</label>
+                <input id="login-email" name="email" type="email" autocomplete="email" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Email address">
+            </div>
+            <div>
+                <label for="login-password" class="sr-only">Password</label>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password">
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900">
+                Sign in
+            </button>
+        </div>
+    </form>
+
+    <!-- Registration Form -->
+    <form id="register-form" class="hidden space-y-6">
+        <div class="space-y-4 rounded-md shadow-sm">
+            <div>
+                <label for="register-username" class="sr-only">Username</label>
+                <input id="register-username" name="username" type="text" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Username">
+            </div>
+            <div>
+                <label for="register-email" class="sr-only">Email address</label>
+                <input id="register-email" name="email" type="email" autocomplete="email" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Email address">
+            </div>
+            <div>
+                <label for="register-password" class="sr-only">Password</label>
+                <input id="register-password" name="password" type="password" required class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password">
+            </div>
+            <!-- Role Selection -->
+            <div>
+                <label for="role" class="block mb-2 text-sm font-medium text-gray-400">Register as:</label>
+                <select id="role" name="role" class="w-full px-3 py-2 text-white bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="CLIENT">Client</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="w-full px-4 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900">
+                Create Account
+            </button>
+        </div>
+    </form>
+    <div id="message-area" class="min-h-[24px] text-center text-red-400 font-medium"></div>
+</div>
+
+<script>
+    const loginTab = document.getElementById('login-tab');
+    const registerTab = document.getElementById('register-tab');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const messageArea = document.getElementById('message-area');
+
+    loginTab.addEventListener('click', () => {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        messageArea.textContent = '';
+    });
+
+    registerTab.addEventListener('click', () => {
+        registerTab.classList.add('active');
+        loginTab.classList.remove('active');
+        registerForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        messageArea.textContent = '';
+    });
+
+    // --- Registration Logic ---
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageArea.textContent = '';
+
+        const data = {
+            username: registerForm.username.value,
+            email: registerForm.email.value,
+            password: registerForm.password.value,
+            role: registerForm.role.value
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Registration failed. Please try again.');
+            }
+
+            const result = await response.json();
+            localStorage.setItem('jwt_token', result.token);
+            window.location.href = '/'; // Redirect to the main app
+
+        } catch (error) {
+            messageArea.textContent = error.message;
+        }
+    });
+
+    // --- Login Logic ---
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        messageArea.textContent = '';
+
+        const data = {
+            email: loginForm.email.value,
+            password: loginForm.password.value
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/auth/authenticate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error('Login failed. Please check your email and password.');
+            }
+
+            const result = await response.json();
+            localStorage.setItem('jwt_token', result.token);
+            window.location.href = '/'; // Redirect to the main app
+
+        } catch (error) {
+            messageArea.textContent = error.message;
+        }
+    });
+</script>
+</body>
+</html>
+```

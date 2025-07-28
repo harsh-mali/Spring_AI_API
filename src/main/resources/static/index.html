@@ -5,20 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Recipe Generator</title>
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Custom Styles & Configuration -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a; /* A very dark gray, almost black */
-            color: #f0f0f0; /* Off-white for better readability */
+            background-color: #0a0a0a;
+            color: #f0f0f0;
         }
         .gradient-text {
             background: linear-gradient(to right, #4f46e5, #ec4899);
@@ -28,7 +24,6 @@
         .glow-effect {
             box-shadow: 0 0 15px rgba(79, 70, 229, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
         }
-        /* Custom styles for recipe generator output */
         #recipe-output h2 {
             font-size: 1.5rem;
             font-weight: bold;
@@ -58,15 +53,37 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-900">
+
+<!-- Auth Check Script -->
+<script>
+    // This script runs before the page loads to protect the route
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        window.location.href = '/login.html';
+    }
+</script>
+
+<!-- Header -->
+<header class="bg-gray-800/50 backdrop-blur-lg border-b border-gray-700 sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold gradient-text">AI Recipe Generator</h1>
+        <div>
+            <!-- We can add a profile button here later -->
+            <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                Logout
+            </button>
+        </div>
+    </div>
+</header>
 
 <!-- Main Content -->
-<main>
+<main class="flex items-center justify-center min-h-screen pt-16 pb-16">
     <!-- Recipe Generator Section -->
     <section id="recipe-generator">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-5xl font-bold gradient-text">AI Recipe Generator</h1>
+                <h1 class="text-4xl md:text-5xl font-bold text-white">Let's Get Cooking</h1>
                 <p class="text-gray-400 mt-2">Enter your ingredients and let our AI chef create a recipe for you!</p>
             </div>
             <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -76,11 +93,11 @@
                     <form id="recipe-form">
                         <div class="mb-4">
                             <label for="ingredients" class="block text-gray-400 mb-2 font-semibold">Available Ingredients</label>
-                            <textarea id="ingredients" name="ingredients" rows="4" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., chickpeas, garlic, lemon, tahini, olive oil"></textarea>
+                            <textarea id="ingredients" name="ingredients" rows="4" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., chicken, rice, tomatoes"></textarea>
                         </div>
                         <div class="mb-6">
                             <label for="restrictions" class="block text-gray-400 mb-2 font-semibold">Dietary Restrictions</label>
-                            <input type="text" id="restrictions" name="restrictions" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., vegan, gluten-free">
+                            <input type="text" id="restrictions" name="restrictions" class="w-full bg-gray-800 border border-gray-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="e.g., vegetarian, low-carb">
                         </div>
                         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 glow-effect transform hover:scale-105">
                             Generate Recipe
@@ -108,6 +125,13 @@
 
 <!-- JavaScript for Functionality -->
 <script>
+    // --- Logout Logic ---
+    document.getElementById('logout-button').addEventListener('click', () => {
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/login.html';
+    });
+
+
     // --- Recipe Generator ---
     const recipeForm = document.getElementById('recipe-form');
     const recipeOutput = document.getElementById('recipe-output');
@@ -124,24 +148,37 @@
             return;
         }
 
-        // Show loading indicator and clear previous output
         recipeOutput.innerHTML = '';
         loadingIndicator.classList.remove('hidden');
 
-        // This is the prompt template you provided
         const fullPrompt = `
 You are a professional chef and nutritionist. I will provide a list of available ingredients and any dietary restrictions. Based on that, generate one unique, delicious, and practical recipe that strictly follows these constraints.Return the output in the following structured format:Title: [Recipe name]Ingredients:- List all ingredients used with exact quantities (in grams, ml, tbsp, etc.)Instructions:1. Step-by-step cooking process.Cooking Time: [Total time in minutes]Serving Size: [How many people it serves]Dietary Notes:- Clearly state how the recipe satisfies the given restrictions (e.g., Vegan, Gluten-Free, Low-Carb).---**Here are the inputs:**Ingredients: ${ingredients}Dietary Restrictions: ${restrictions || 'None'}
         `;
 
         try {
-            // **FIXED THE URL AND DATA FORMAT HERE**
-            const response = await fetch('http://localhost:8080/api/gemini/ask', { // CORRECTED URL
+            // Get the token from localStorage
+            const token = localStorage.getItem('jwt_token');
+            if (!token) {
+                // This should not happen due to the auth check at the top, but it's good practice
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/api/gemini/ask', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'text/plain', // CORRECTED Content-Type
+                    'Content-Type': 'text/plain',
+                    'Authorization': `Bearer ${token}` // Add the Authorization header
                 },
-                body: fullPrompt, // CORRECTED: Sending the prompt as a plain string
+                body: fullPrompt,
             });
+
+            if (response.status === 403) {
+                 // Handle forbidden error, likely an invalid token
+                localStorage.removeItem('jwt_token');
+                window.location.href = '/login.html';
+                return;
+            }
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -150,7 +187,6 @@ You are a professional chef and nutritionist. I will provide a list of available
 
             const resultText = await response.text();
 
-            // Format the plain text response from the AI into clean HTML
             let formattedResponse = resultText
                 .replace(/Title: (.*)/g, '<h2>$1</h2>')
                 .replace(/Ingredients:/g, '<h3>Ingredients:</h3>')
@@ -159,10 +195,9 @@ You are a professional chef and nutritionist. I will provide a list of available
                 .replace(/Serving Size:/g, '<h3>Serving Size:</h3>')
                 .replace(/Dietary Notes:/g, '<h3>Dietary Notes:</h3>');
 
-            // Process lists
             const lines = formattedResponse.split('\n');
             let html = '';
-            let inList = null; // can be 'ul' or 'ol'
+            let inList = null;
 
             lines.forEach(line => {
                 line = line.trim();
@@ -196,12 +231,50 @@ You are a professional chef and nutritionist. I will provide a list of available
 
         } catch (error) {
             console.error('Error calling the AI API:', error);
-            recipeOutput.innerHTML = `<p class="text-red-400"><strong>Sorry, something went wrong.</strong><br>Please ensure your Spring AI API is running on localhost:8080 and try again. Check the browser's developer console (F12) for more details.</p>`;
+            recipeOutput.innerHTML = `<p class="text-red-400"><strong>Sorry, something went wrong.</strong><br>Please ensure your Spring AI API is running on localhost:8080 and try again.</p>`;
         } finally {
-             // Hide loading indicator
             loadingIndicator.classList.add('hidden');
         }
     });
 </script>
 </body>
 </html>
+```
+
+Now, let's address your other two questions.
+
+### Step 2: Guide to Using a Permanent Database
+
+To switch from the temporary H2 database to a permanent one like PostgreSQL, follow this guide.
+
+
+### How to Switch from H2 to PostgreSQL
+
+Using a permanent database like PostgreSQL is essential for a real application. Here’s how to configure your Spring Boot project to use it.
+
+#### Prerequisites
+1.  **Install PostgreSQL:** You need to have PostgreSQL installed on your computer. You can download it from the [official website](https://www.postgresql.org/download/).
+2.  **Create a Database:** Using a tool like `psql` or a GUI like pgAdmin, create a new database for your project. For this example, let's say you named it `ai_recipes_db`.
+
+#### Step 2.1: Update Your `pom.xml`
+
+You need to add the PostgreSQL driver dependency and remove the H2 one.
+
+1.  **Add PostgreSQL Driver:**
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+2.  **Remove H2 Driver:** Delete this entire dependency block.
+```xml
+<!-- REMOVE THIS BLOCK -->
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
