@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 @CrossOrigin // Allow requests from our frontend
-@PreAuthorize("hasRole('ADMIN')") // Secures all methods in this controller
+@PreAuthorize("hasAuthority('ADMIN')") // Secures all methods in this controller
 public class AdminController {
 
     private final AdminService adminService;

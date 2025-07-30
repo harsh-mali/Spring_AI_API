@@ -144,7 +144,7 @@
     function handleRedirect(token) {
         const decodedToken = parseJwt(token);
         const roles = decodedToken ? decodedToken.roles || [] : [];
-        if (roles.includes('ROLE_ADMIN')) {
+        if (roles.includes('ADMIN')) {
             window.location.href = '/admin.html';
         } else {
             window.location.href = '/';

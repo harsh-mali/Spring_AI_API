@@ -262,7 +262,7 @@
 <script>
     // --- NEW: Add Admin Link if applicable ---
     const adminLinkContainer = document.getElementById('admin-link-container');
-    if (userRoles.includes('ROLE_ADMIN')) {
+    if (userRoles.includes('ADMIN')) {
         const adminLink = document.createElement('a');
         adminLink.href = '/admin.html';
         adminLink.className = 'dropdown-item';
@@ -416,11 +416,11 @@ Dietary Restrictions: ${restrictions || 'None'}
     async function callGeminiAPI(prompt) {
         const token = localStorage.getItem('jwt_token');
         if (!token) { window.location.href = '/login.html'; throw new Error("No auth token found"); }
-        const response = await fetch('http://localhost:8080/api/gemini/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain', 'Authorization': `Bearer ${token}` },
-            body: prompt,
-        });
+        const response = await fetch('/api/gemini/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain', 'Authorization': `Bearer ${token}` },
+                body: prompt,
+            });
         if (response.status === 403) { localStorage.removeItem('jwt_token'); window.location.href = '/login.html'; throw new Error("Forbidden"); }
         if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
         return await response.text();

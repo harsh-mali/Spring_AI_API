@@ -70,7 +70,7 @@
     function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; } }
     const decodedToken = parseJwt(token);
     const userRoles = decodedToken ? decodedToken.roles || [] : [];
-    if (!userRoles.includes('ROLE_ADMIN')) { window.location.href = '/'; }
+    if (!userRoles.includes('ADMIN')) { window.location.href = '/'; }
 </script>
 
 <header class="glass-header sticky top-0 z-50">
